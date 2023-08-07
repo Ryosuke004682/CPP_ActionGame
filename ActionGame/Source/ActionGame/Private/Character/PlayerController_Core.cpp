@@ -24,9 +24,6 @@ APlayerController_Core::APlayerController_Core()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(Camera);
 
-
-	
-
 }
 
 void APlayerController_Core::BeginPlay()
@@ -41,6 +38,7 @@ void APlayerController_Core::Tick(float DeltaTime)
 
 }
 
+/*入力キー関連*/
 void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -49,8 +47,12 @@ void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAxis(FName("MoveRight")	, this , &APlayerController_Core::MoveRight);
 	PlayerInputComponent->BindAxis(FName("Turn")		, this , &APlayerController_Core::Turn);
 	PlayerInputComponent->BindAxis(FName("LookUp")		, this , &APlayerController_Core::LookUp);
+
+	//IE_Pressed : 押された場合実行
+	PlayerInputComponent->BindAction(FName("Jump") , IE_Pressed, this , &ACharacter::Jump);
 }
 
+/*前方通常移動*/
 void APlayerController_Core::MoveForward(float Value)
 {
 	if (Controller && (Value != 0.f))
@@ -69,6 +71,7 @@ void APlayerController_Core::MoveForward(float Value)
 	}
 }
 
+/*左右通常移動*/
 void APlayerController_Core::MoveRight(float Value)
 {
 	if (Controller && (Value != 0.f))
@@ -86,11 +89,13 @@ void APlayerController_Core::MoveRight(float Value)
 	}
 }
 
+/*カメラ操作_左右*/
 void APlayerController_Core::Turn(float Value)
 {
 	AddControllerYawInput(Value);
 }
 
+/*カメラ操作_上下*/
 void APlayerController_Core::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
