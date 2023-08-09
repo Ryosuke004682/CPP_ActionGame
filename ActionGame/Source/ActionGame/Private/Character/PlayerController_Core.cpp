@@ -2,6 +2,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Items/Item.h"
+#include "Items/Weapons/Weapon.h"
 
 APlayerController_Core::APlayerController_Core()
 {
@@ -50,6 +52,8 @@ void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 	//IE_Pressed : 押された場合実行
 	PlayerInputComponent->BindAction(FName("Jump") , IE_Pressed, this , &ACharacter::Jump);
+	PlayerInputComponent->BindAction(FName("Equip"), IE_Pressed, this , &APlayerController_Core::EKeyPressed);
+
 }
 
 /*前方通常移動*/
@@ -101,4 +105,15 @@ void APlayerController_Core::LookUp(float Value)
 	AddControllerPitchInput(Value);
 }
 
+/*アイテムを拾うかどうか*/
+void APlayerController_Core::EKeyPressed()
+{
+	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
+	if (OverlappingWeapon) 
+	{
+		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
 
+		//片手に装備している判定にする。
+		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	}
+}

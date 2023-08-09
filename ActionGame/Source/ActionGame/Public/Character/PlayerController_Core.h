@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "CharacterType.h"
 #include "PlayerController_Core.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
+class AItem;
 
 
 UCLASS()
@@ -21,16 +23,29 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
+
 	void MoveForward(float Value);
 	void MoveRight	(float Value);
 	void Turn		(float Value);
 	void LookUp		(float Value);
+	void EKeyPressed();
 
 private:
+
+	//•Ší‚ª‘•”õ‚³‚ê‚Ä‚È‚¢ó‘Ô‚Ìİ’è
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
+
 	UPROPERTY(VisibleAnywhere)
 		USpringArmComponent* Camera;
 
 	UPROPERTY(VisibleAnywhere)
 		UCameraComponent* ViewCamera;
+
+	UPROPERTY(VisibleInstanceOnly)
+		AItem* OverlappingItem;
+
+public:
+	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }
+	FORCEINLINE ECharacterState GetCharacterState() const { return CharacterState; }
 };
