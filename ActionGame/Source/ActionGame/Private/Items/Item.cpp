@@ -54,11 +54,10 @@ void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 void AItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	RunningTime += DeltaTime;
-
-	float DeltaZ = Amplitude * FMath::Sin(RunningTime * TimeConstant);
-	AddActorWorldOffset(FVector(0.f,0.f,DeltaZ));
-
-	AddActorWorldRotation(FRotator(0.f , RotationSpeed * DeltaTime , 0.f));
+	
+	if (ItemState == EItemState::EIS_Hovering)
+	{
+		AddActorWorldOffset(FVector(0.f, 0.f, TransformedSin()));
+	}
 }

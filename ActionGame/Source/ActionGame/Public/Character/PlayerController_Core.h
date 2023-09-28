@@ -8,6 +8,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class AItem;
+class UAnimMontage;
 
 
 UCLASS()
@@ -24,16 +25,28 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	/*Callbacks for input*/
 	void MoveForward(float Value);
 	void MoveRight	(float Value);
 	void Turn		(float Value);
 	void LookUp		(float Value);
 	void EKeyPressed();
+	void Attack();
+
+	/*PlayerMontageFunction*/
+	void PlayerAttackMontage();
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEnd();
+	bool CanAttack();
 
 private:
 
 	//ïêäÌÇ™ëïîıÇ≥ÇÍÇƒÇ»Ç¢èÛë‘ÇÃê›íË
 	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
+	UPROPERTY(BlueprintReadWrite , meta = (AllowPrivateAccess = "true"))
+	EActionState ActionState       = EActionState::EAS_Unoccupied;
 
 
 	UPROPERTY(VisibleAnywhere)
@@ -44,6 +57,12 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly)
 		AItem* OverlappingItem;
+
+
+	/*PlayerMontage*/
+	UPROPERTY(EditDefaultsOnly, Category = Montage)
+		UAnimMontage* AttackMontage;
+
 
 public:
 	FORCEINLINE void SetOverlappingItem(AItem* Item) { OverlappingItem = Item; }

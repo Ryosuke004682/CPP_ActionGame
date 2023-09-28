@@ -12,10 +12,10 @@ void UPlayer_AnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	//ƒ|[ƒ“‚ğæ“¾‚·‚é
-	PlayerController = Cast<APlayerController_Core>(TryGetPawnOwner());//‰Šú‰»
-	if (PlayerController)
+	PlayerControllerCore = Cast<APlayerController_Core>(TryGetPawnOwner());//‰Šú‰»
+	if (PlayerControllerCore)
 	{
-		PlayerMovement = PlayerController->GetCharacterMovement();
+		PlayerMovement = PlayerControllerCore->GetCharacterMovement();
 	}
 }
 
@@ -28,9 +28,7 @@ void UPlayer_AnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (PlayerMovement)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(PlayerMovement->Velocity);
-		IsJump = PlayerMovement->IsFalling();
-		CharacterState = PlayerController->GetCharacterState();
-
-		PlayerMovement->JumpZVelocity = 250.f;
+		IsFalling = PlayerMovement->IsFalling();
+		CharacterState = PlayerControllerCore->GetCharacterState();
 	}
 }
