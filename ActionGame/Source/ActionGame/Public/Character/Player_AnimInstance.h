@@ -7,7 +7,7 @@
 #include "CharacterType.h"
 #include "Player_AnimInstance.generated.h"
 
-/*
+/**
  * 
  */
 UCLASS()
@@ -21,7 +21,7 @@ public:
 
 	//キャラクターを取得
 	UPROPERTY(BlueprintReadOnly)
-	class APlayerController_Core* PlayerController;
+	class APlayerController_Core* PlayerControllerCore;
 
 	//移動処理を取得
 	UPROPERTY(BlueprintReadOnly , Category = Movement)
@@ -32,8 +32,9 @@ public:
 	float GroundSpeed;
 
 	UPROPERTY(BlueprintReadOnly , Category = Movement)
-	bool IsJump;
+	bool IsFalling;
 
 
+	UPROPERTY(BlueprintReadOnly , Category = "Movement | Character State")
 	ECharacterState CharacterState;
 };

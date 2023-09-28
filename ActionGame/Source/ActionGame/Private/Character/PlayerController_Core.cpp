@@ -4,6 +4,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
+#include "Animation/AnimMontage.h"
 
 APlayerController_Core::APlayerController_Core()
 {
@@ -51,14 +52,17 @@ void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAxis(FName("LookUp")		, this , &APlayerController_Core::LookUp);
 
 	//IE_Pressed : 押された場合実行
-	PlayerInputComponent->BindAction(FName("Jump") , IE_Pressed, this , &ACharacter::Jump);
-	PlayerInputComponent->BindAction(FName("Equip"), IE_Pressed, this , &APlayerController_Core::EKeyPressed);
+	PlayerInputComponent->BindAction(FName("Jump")  , IE_Pressed, this , &ACharacter::Jump);
+	PlayerInputComponent->BindAction(FName("Equip") , IE_Pressed, this , &APlayerController_Core::EKeyPressed);
+	PlayerInputComponent->BindAction(FName("Attack"), IE_Pressed, this , &APlayerController_Core::Attack);
 
 }
 
 /*前方通常移動*/
 void APlayerController_Core::MoveForward(float Value)
 {
+	if (ActionState == EActionState::EAS_Attacking) return;
+
 	if (Controller && (Value != 0.f))
 	{
 		// カメラの方向を基準にしたローカル移動方向を計算
@@ -78,6 +82,8 @@ void APlayerController_Core::MoveForward(float Value)
 /*左右通常移動*/
 void APlayerController_Core::MoveRight(float Value)
 {
+	if (ActionState == EActionState::EAS_Attacking) return;
+
 	if (Controller && (Value != 0.f))
 	{
 		const FRotator ControlRotation = Controller->GetControlRotation();
@@ -116,4 +122,62 @@ void APlayerController_Core::EKeyPressed()
 		//片手に装備している判定にする。
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
 	}
+}
+
+void APlayerController_Core::Attack()
+{
+
+	if(CanAttack())
+	{
+		PlayerAttackMontage();
+		ActionState = EActionState::EAS_Attacking;
+	}
+
+}
+
+
+bool APlayerController_Core::CanAttack()
+{
+	return  ActionState == EActionState::EAS_Unoccupied
+		&& CharacterState != ECharacterState::ECS_Unequipped;
+}
+
+
+
+void APlayerController_Core::PlayerAttackMontage()
+{
+	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && AttackMontage)
+
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+		const int32 Selection = FMath::RandRange(0, 2);
+		FName SectionName = FName();
+
+		switch (Selection)
+		{
+		case 0:
+			SectionName = FName("Attack1");
+			break;
+
+		case 1:
+			SectionName = FName("Attack2");
+			break;
+
+		case 2:
+			SectionName = FName("Attack3");
+			break;
+
+		default:
+			break;
+		}
+		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
+	}
+
+}
+
+void APlayerController_Core::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
 }
