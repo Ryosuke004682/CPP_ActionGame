@@ -41,7 +41,10 @@ void APlayerController_Core::Tick(float DeltaTime)
 
 }
 
-/*入力キー関連*/
+/// <summary>
+/// 入力関連をまとめてるところ
+/// </summary>
+/// <param name="PlayerInputComponent"></param>
 void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -58,10 +61,14 @@ void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 }
 
-/*前方通常移動*/
+
+/// <summary>
+/// 前後移動の処理
+/// </summary>
+/// <param name="Value"></param>
 void APlayerController_Core::MoveForward(float Value)
 {
-	if (ActionState == EActionState::EAS_Attacking) return;
+	if (ActionState != EActionState::EAS_Unoccupied) return;
 
 	if (Controller && (Value != 0.f))
 	{
@@ -79,10 +86,13 @@ void APlayerController_Core::MoveForward(float Value)
 	}
 }
 
-/*左右通常移動*/
+/// <summary>
+/// 左右移動の処理
+/// </summary>
+/// <param name="Value"></param>
 void APlayerController_Core::MoveRight(float Value)
 {
-	if (ActionState == EActionState::EAS_Attacking) return;
+	if (ActionState != EActionState::EAS_Unoccupied) return;
 
 	if (Controller && (Value != 0.f))
 	{
@@ -94,56 +104,131 @@ void APlayerController_Core::MoveRight(float Value)
 		const FRotator CameraYawRotation(0.f, CameraRotation.Yaw, 0.f);
 		const FVector  CameraDirection = FRotationMatrix(CameraYawRotation).GetUnitAxis(EAxis::Y);
 
-
 		AddMovementInput(CameraDirection, Value);
 	}
 }
 
-/*カメラ操作_左右*/
+
+/// <summary>
+/// カメラ操作_左右の処理
+/// </summary>
+/// <param name="Value"></param>
 void APlayerController_Core::Turn(float Value)
 {
 	AddControllerYawInput(Value);
 }
 
-/*カメラ操作_上下*/
+/// <summary>
+/// カメラ操作_上下の処理
+/// </summary>
+/// <param name="Value"></param>
 void APlayerController_Core::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
 }
 
-/*アイテムを拾うかどうか*/
+
 void APlayerController_Core::EKeyPressed()
 {
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
-	if (OverlappingWeapon) 
+	if (OverlappingWeapon)
 	{
 		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket"));
-
-		//片手に装備している判定にする。
 		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+		OverlappingItem = nullptr;
+		EquippedWeapon  = OverlappingWeapon;
 	}
+	else
+	{
+		//納刀/抜刀の処理
+		if ( CanDisarm() )
+		{
+			PlayEquipMontage(FName("UnEquip"));
+			CharacterState = ECharacterState::ECS_Unequipped;
+			ActionState    = EActionState::EAS_EquippingWeapon;
+		}
+		else if ( CanArm() )
+		{
+			PlayEquipMontage(FName("Equip"));
+			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+			ActionState    = EActionState::EAS_EquippingWeapon;
+		}
+	}
+
 }
 
+/// <summary>
+/// 攻撃の処理
+/// </summary>
 void APlayerController_Core::Attack()
 {
-
-	if(CanAttack())
+	//攻撃可能ならStateをAttackStateに遷移させて攻撃させる。
+	if( CanAttack() )
 	{
 		PlayerAttackMontage();
 		ActionState = EActionState::EAS_Attacking;
 	}
-
 }
 
 
+/// <summary>
+/// 攻撃可能だったら攻撃のステートの判定を返す処理
+/// </summary>
+/// <returns></returns>
 bool APlayerController_Core::CanAttack()
 {
-	return  ActionState == EActionState::EAS_Unoccupied
+	return ActionState == EActionState::EAS_Unoccupied
 		&& CharacterState != ECharacterState::ECS_Unequipped;
 }
 
 
+/// <summary>
+/// 装備してるかどうかの判定を返す処理
+/// </summary>
+/// <returns></returns>
+bool APlayerController_Core::CanDisarm()
+{
+	return ActionState == EActionState::EAS_Unoccupied && CharacterState
+					   != ECharacterState::ECS_Unequipped;
+}
 
+
+
+/// <summary>
+/// 手に装備させる
+/// </summary>
+/// <returns></returns>
+bool APlayerController_Core::CanArm()
+{
+	return ActionState == EActionState::EAS_Unoccupied && CharacterState 
+					   == ECharacterState::ECS_Unequipped && EquippedWeapon;
+}
+
+void APlayerController_Core::Disarm()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh() , FName("SpineSocket"));
+	}
+}
+
+void APlayerController_Core::Arm()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
+	}
+}
+
+void APlayerController_Core::FinishEquipping()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+
+/// <summary>
+/// 攻撃パターンをランダムで実行する処理
+/// </summary>
 void APlayerController_Core::PlayerAttackMontage()
 {
 	 UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -174,9 +259,25 @@ void APlayerController_Core::PlayerAttackMontage()
 		}
 		AnimInstance->Montage_JumpToSection(SectionName, AttackMontage);
 	}
-
 }
 
+
+
+void APlayerController_Core::PlayEquipMontage(FName SectionName)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && EquippedMontage)
+	{
+		AnimInstance->Montage_Play(EquippedMontage);
+		AnimInstance->Montage_JumpToSection(SectionName , EquippedMontage);
+	}
+}
+
+
+/// <summary>
+/// 攻撃終わりを通知する処理
+/// </summary>
 void APlayerController_Core::AttackEnd()
 {
 	ActionState = EActionState::EAS_Unoccupied;

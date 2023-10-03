@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class AItem;
 class UAnimMontage;
+class AWeapon;
 
 
 UCLASS()
@@ -40,6 +41,21 @@ protected:
 	void AttackEnd();
 	bool CanAttack();
 
+	void PlayEquipMontage(FName SectionName);
+	bool CanDisarm();
+	bool CanArm();
+
+
+	UFUNCTION(BlueprintCallable)
+		void Disarm();
+
+	UFUNCTION(BlueprintCallable)
+		void Arm();
+
+	UFUNCTION(BlueprintCallable)
+		void FinishEquipping();
+
+
 private:
 
 	//•Ší‚ª‘•”õ‚³‚ê‚Ä‚È‚¢ó‘Ô‚Ìİ’è
@@ -58,10 +74,16 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 		AItem* OverlappingItem;
 
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+		AWeapon* EquippedWeapon;
+
 
 	/*PlayerMontage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
 		UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montage)
+		UAnimMontage* EquippedMontage;
 
 
 public:
