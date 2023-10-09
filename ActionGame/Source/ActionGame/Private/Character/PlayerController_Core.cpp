@@ -5,6 +5,7 @@
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
+#include "Components/BoxComponent.h"
 
 APlayerController_Core::APlayerController_Core()
 {
@@ -60,6 +61,15 @@ void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction(FName("Attack"), IE_Pressed, this , &APlayerController_Core::Attack);
 
 }
+
+void APlayerController_Core::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable)
+{
+	if (EquippedWeapon && EquippedWeapon->GetWeaponBox())
+	{
+		EquippedWeapon->GetWeaponBox()->SetCollisionEnabled(CollisionEnable);
+	}
+}
+
 
 
 /// <summary>
@@ -126,6 +136,7 @@ void APlayerController_Core::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
 }
+
 
 
 void APlayerController_Core::EKeyPressed()
