@@ -7,6 +7,8 @@
 #include "Interface/HitInterface.h"
 #include "Enemy.generated.h"
 
+class UAnimMontage;
+
 UCLASS()
 class ACTIONGAME_API AEnemy : public ACharacter, public IHitInterface
 {
@@ -20,7 +22,18 @@ public:
 
 	virtual void GetHit(const FVector& ImpactPoint) override;
 
+	void DirectionalHitReact(const FVector& ImpactPoint);
+
+private:
+
+	/*Animation Montages*/
+	UPROPERTY(EditDefaultsOnly, Category = Montage)
+		UAnimMontage* HitReactMontage;
+
 protected:
 	virtual void BeginPlay() override;
+
+	/*Play montage function*/
+	void PlayHitReactMontage(const FName& SectionName);
 
 };
