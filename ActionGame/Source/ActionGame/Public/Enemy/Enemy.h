@@ -30,6 +30,16 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
 		UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = Sounds)
+		USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere, Category = Sounds)
+		USoundBase* SlashSound;
+
+	UPROPERTY(EditAnywhere, Category = Effect)
+		UParticleSystem* HitParticles;
+
+
 protected:
 	virtual void BeginPlay() override;
 
