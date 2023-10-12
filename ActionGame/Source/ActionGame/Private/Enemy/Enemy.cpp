@@ -59,7 +59,7 @@ void AEnemy::GetHit(const FVector& ImpactPoint)
 		);
 
 
-	//Œ§‚ª“–‚½‚Á‚½‚Æ‚«‚ÌŽåŒø‰Ê‰¹
+	//Œ•‚ª“–‚½‚Á‚½‚Æ‚«‚ÌŽåŒø‰Ê‰¹
 	if (HitSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation
