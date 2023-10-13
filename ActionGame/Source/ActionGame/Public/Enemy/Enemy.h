@@ -36,6 +36,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = Sounds)
 		USoundBase* SlashSound;
 
+	//ここでエフェクト呼び出してるよ
 	UPROPERTY(EditAnywhere, Category = Effect)
 		UParticleSystem* HitParticles;
 
