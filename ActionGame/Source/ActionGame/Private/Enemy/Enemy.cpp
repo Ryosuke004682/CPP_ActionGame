@@ -5,8 +5,6 @@
 #include "ActionGame/DebugMacros.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "Component/PlayerComponent.h"
-
 
 AEnemy::AEnemy()
 {
@@ -17,8 +15,6 @@ AEnemy::AEnemy()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera , ECollisionResponse::ECR_Ignore);
-
-	PlayerComponent = CreateDefaultSubobject<UPlayerComponent>(TEXT("Attribute"));
 }
 
 void AEnemy::BeginPlay()
