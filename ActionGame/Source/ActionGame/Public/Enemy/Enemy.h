@@ -8,6 +8,7 @@
 #include "Enemy.generated.h"
 
 class UAnimMontage;
+class UPlayerComponent;
 
 UCLASS()
 class ACTIONGAME_API AEnemy : public ACharacter, public IHitInterface
@@ -23,6 +24,9 @@ public:
 			void DirectionalHitReact(const FVector& ImpactPoint);
 
 private:
+
+	UPROPERTY(VisibleAnywhere)
+		UPlayerComponent* PlayerComponent;
 
 	/*Animation Montages*/
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
