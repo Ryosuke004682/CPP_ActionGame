@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "Items/Item.h"
-#include "../../../../Intermediate/ProjectFiles/DebugMacros.h"
+#include "ActionGame/DebugMacros.h"
 #include "Components/SphereComponent.h"
 #include "Character/PlayerController_Core.h"
 #include "NiagaraComponent.h"
