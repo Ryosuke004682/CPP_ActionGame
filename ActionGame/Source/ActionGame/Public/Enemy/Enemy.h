@@ -5,10 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/HitInterface.h"
+#include "Character/CharacterType.h"
 #include "Enemy.generated.h"
 
 class UAnimMontage;
 class UPlayerComponent;
+class UHitpointBarComponent;
+
+
 
 UCLASS()
 class ACTIONGAME_API AEnemy : public ACharacter, public IHitInterface
@@ -23,14 +27,26 @@ public:
 	virtual void GetHit_Implementation(const FVector& ImpactPoint);
 			void DirectionalHitReact(const FVector& ImpactPoint);
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UPROPERTY(EditAnywhere)
+		float EnemyDisappear = 5.f;
+
+
 private:
 
 	UPROPERTY(VisibleAnywhere)
 		UPlayerComponent* PlayerComponent;
 
+	UPROPERTY(VisibleAnywhere)
+		UHitpointBarComponent* HealthBarWidget;
+
 	/*Animation Montages*/
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
 		UAnimMontage* HitReactMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = Montage)
+		UAnimMontage* DeathMontage;
 
 	UPROPERTY(EditAnywhere, Category = Sounds)
 		USoundBase* HitSound;
@@ -41,11 +57,21 @@ private:
 	UPROPERTY(EditAnywhere, Category = Effect)
 		UParticleSystem* HitParticles;
 
+	UPROPERTY()
+		AActor* CombatTarget;
+
+	UPROPERTY(EditAnywhere)
+		double CombatRadius = 500.0f;
 
 protected:
 	virtual void BeginPlay() override;
 
-	/*Play montage function*/
+	void Die();
+
+	/* Play Montage Function */
 	void PlayHitReactMontage(const FName& SectionName);
+
+	UPROPERTY(BlueprintReadOnly)
+	EDeathPose DeathPose = EDeathPose::EDP_Alive;
 
 };
