@@ -11,7 +11,7 @@
 class UAnimMontage;
 class UPlayerComponent;
 class UHitpointBarComponent;
-
+class UPawnSensingComponent;
 
 
 UCLASS()
@@ -23,23 +23,30 @@ public:
 	AEnemy();
 
 	virtual void Tick(float DeltaTime) override;
+			void CheckPatrolTarget();
+			void CheckCombatTarget();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint);
 			void DirectionalHitReact(const FVector& ImpactPoint);
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 		float EnemyDisappear = 5.f;
 
 
 private:
 
-	UPROPERTY(VisibleAnywhere)
+	/*Components*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly , meta = (AllowPrivateAccess = "true"))
 		UPlayerComponent* PlayerComponent;
 
 	UPROPERTY(VisibleAnywhere)
 		UHitpointBarComponent* HealthBarWidget;
+
+	UPROPERTY(VisibleAnywhere)
+		UPawnSensingComponent* PawnSensing;
+
 
 	/*Animation Montages*/
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
@@ -60,13 +67,47 @@ private:
 	UPROPERTY()
 		AActor* CombatTarget;
 
+
+	/*Navigation*/
+	UPROPERTY()
+		class AAIController* EnemyController;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+		AActor* PatrolTarget;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI Navigation")
+		TArray<AActor*> PatrolTargets;
+
 	UPROPERTY(EditAnywhere)
-		double CombatRadius = 500.0f;
+		double CombatRadius = 500.f;
+
+	UPROPERTY(EditAnywhere)
+		double AttackRadius = 150.f;
+
+	FTimerHandle PatrolTimer;
+	void PatrolTimerFinished();
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+		float WaitMin = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "AI Navigation")
+		float WaitMax = 2.f;
+
+
+	EEnemyState EnemyState = EEnemyState::EES_Patrolling;
+
 
 protected:
 	virtual void BeginPlay() override;
 
 	void Die();
+	bool InTargetRange(AActor* Target, double Radius);
+	void MoveToTarget (AActor* Target);
+	AActor* ChoosePatrolTarget();
+
+	UFUNCTION()
+	void PawnSeen(APawn* SeenPawn);
+
 
 	/* Play Montage Function */
 	void PlayHitReactMontage(const FName& SectionName);

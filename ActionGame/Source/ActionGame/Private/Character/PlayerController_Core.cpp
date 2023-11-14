@@ -34,6 +34,8 @@ void APlayerController_Core::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Tags.Add(FName("Player"));
+
 }
 
 void APlayerController_Core::Tick(float DeltaTime)
