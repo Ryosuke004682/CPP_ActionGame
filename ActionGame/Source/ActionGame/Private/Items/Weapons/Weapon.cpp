@@ -131,3 +131,4 @@ void AWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		CreateFields(BoxHit.ImpactPoint);
 	}
 }
+

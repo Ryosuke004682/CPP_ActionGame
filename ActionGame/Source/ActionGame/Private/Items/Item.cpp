@@ -11,6 +11,8 @@ AItem::AItem()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	ItemMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	ItemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = ItemMesh;
 	
 	Sphere	 = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
@@ -26,7 +28,7 @@ void AItem::BeginPlay()
 	Super::BeginPlay();
 	
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlap);
-	Sphere->OnComponentEndOverlap.AddDynamic(this , &AItem::OnSphereEndOverlap);
+	Sphere->OnComponentEndOverlap  .AddDynamic(this, &AItem::OnSphereEndOverlap);
 }
 
 float AItem::TransformedSin()

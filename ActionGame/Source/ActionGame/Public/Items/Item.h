@@ -18,7 +18,8 @@ UCLASS()
 class ACTIONGAME_API AItem : public AActor
 {
 	GENERATED_BODY()
-	
+
+
 public:	
 	AItem();
 	virtual void Tick(float DeltaTime) override;
@@ -26,7 +27,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sine Parameters")
 	float Amplitude = 0.25f;
 
@@ -54,7 +55,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* ItemMesh;
 
-
 	EItemState ItemState = EItemState::EIS_Hovering;
 
 	UPROPERTY(VisibleAnywhere)
@@ -63,9 +63,12 @@ protected:
 	UPROPERTY(EditAnywhere)
 		class UNiagaraComponent* EmbersEffect;
 
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		float RunningTime;
+
+
 };
 
 

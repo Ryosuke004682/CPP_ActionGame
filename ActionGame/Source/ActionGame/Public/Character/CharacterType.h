@@ -1,6 +1,6 @@
 #pragma once
 
-//ECS : íËêîÇÃñ⁄àÛ
+
 UENUM(BlueprintType)
 enum class ECharacterState : uint8
 {
@@ -18,21 +18,24 @@ enum class EActionState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EDeathPose : uint8
-{
-	EDP_Alive  UMETA(DisplayName = "Alive"),
+enum EDeathPose {
 	EDP_Death1 UMETA(DisplayName = "Death_1"),
 	EDP_Death2 UMETA(DisplayName = "Death_2"),
 	EDP_Death3 UMETA(DisplayName = "Death_3"),
 	EDP_Death4 UMETA(DisplayName = "Death_4"),
+
+	EDP_MAX	   UMETA(DisplayName = "DefaultMAX")
 };
 
 
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
+	EES_Dead	   UMETA(DisplayName = "Dead"),
 	EES_Patrolling UMETA(DisplayName = "Patrolling"),
-	EES_Chasing	   UMETA(DisplayName = "Chasing")	,
-	EES_Attacking  UMETA(DisplayName = "Attacking") ,
-	
+	EES_Chasing	   UMETA(DisplayName = "Chasing"),
+	EES_Attacking  UMETA(DisplayName = "Attacking"),
+	EES_Engaged	   UMETA(DisplayName = "Engaged"),
+
+	EES_NoState UMETA(DisplayName = "NoState")
 };
