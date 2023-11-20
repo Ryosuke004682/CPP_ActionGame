@@ -56,7 +56,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		EEnemyState EnemyState = EEnemyState::EES_Patrolling;
 private:
-	
+	/*AI Behavior*/
+	void InitializeEnemy();
 	void CheckPatrolTarget();
 	void CheckCombatTarget();
 	void PatrolTimerFinished();
@@ -78,6 +79,7 @@ private:
 	bool InTargetRange(AActor* Target, double Radius);
 	void MoveToTarget(AActor* Target);
 	AActor* ChoosePatrolTarget();
+	void SpawnDefaultWeapon();
 
 	UFUNCTION()
 		void PawnSeen(APawn* SeenPawn);
