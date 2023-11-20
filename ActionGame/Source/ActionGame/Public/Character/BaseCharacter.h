@@ -7,8 +7,6 @@
 #include "Interface/HitInterface.h"
 #include "BaseCharacter.generated.h"
 
-
-
 class AWeapon;
 class UPlayerComponent;
 class UAnimMontage;
@@ -24,35 +22,31 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
-	UFUNCTION(BlueprintCallable)
-		void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Attack();
 	virtual void Die();
-
-	UFUNCTION(BlueprintCallable)
-	virtual void AttackEnd();
-	virtual bool CanAttack();
-
-	bool IsAlive();
-
-	/*Play montage function*/
-			void PlayHitReactMontage(const FName& SectionName);
 			void DirectionalHitReact(const FVector& ImpactPoint);
 			void PlayerHitSound     (const FVector& ImpactPoint);
 			void PlayerSlashSound   (const FVector& ImpactPoint);
 			void SpawnHitParticles  (const FVector& ImpactPoint, FVector ParticleScale, FRotator RandomRotation);
+			void DisableCapsule();
+	virtual bool CanAttack();
+			bool IsAlive();
+
+	UFUNCTION(BlueprintCallable)
+		void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnable);
+	virtual int32 PlayAttackMontage();
+	virtual int32 PlayDeathMontage();
+
+
+	UFUNCTION(BlueprintCallable)
+	virtual void AttackEnd();
+
+	/*Play montage function*/
+			void PlayHitReactMontage(const FName& SectionName);
+
 	virtual void HandleDamage(float DamageAmount);
-			void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
-
-			int32 PlayRandomMontageSection(UAnimMontage* Montage , const TArray<FName>& SectionNames);
-			virtual int32 PlayAttackMontage();
-			virtual int32 PlayDeathMontage();
-					 void DisableCapsule();
-
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 		AWeapon* EquippedWeapon;
@@ -80,6 +74,9 @@ protected:
 
 
 private:
+	void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
+	int32 PlayRandomMontageSection(UAnimMontage* Montage, const TArray<FName>& SectionNames);
+
 	UPROPERTY(EditAnywhere, Category = Sounds)
 		USoundBase* HitSound;
 
