@@ -4,6 +4,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
@@ -21,6 +22,14 @@ APlayerController_Core::APlayerController_Core()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f , 400.f, 0.f);
 
+	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+	GetMesh()->SetGenerateOverlapEvents(true);
+
+
+
 	//SpringArm‚ð’Ç‰Á
 	Camera = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetRootComponent());
@@ -36,7 +45,7 @@ void APlayerController_Core::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	Tags.Add(FName("Player"));
+	Tags.Add(FName("EngageableTarget"));
 
 }
 
@@ -64,6 +73,12 @@ void APlayerController_Core::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	PlayerInputComponent->BindAction(FName("Equip") , IE_Pressed, this , &APlayerController_Core::EKeyPressed);
 	PlayerInputComponent->BindAction(FName("Attack"), IE_Pressed, this , &APlayerController_Core::Attack);
 
+}
+
+void APlayerController_Core::GetHit_Implementation(const FVector& ImpactPoint)
+{
+	PlayerHitSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint);
 }
 
 

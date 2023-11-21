@@ -5,7 +5,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
-#include "Components/PlayerComponent.h"
+#include "Component/PlayerComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "HUD/HitpointBarComponent.h"
 #include "Items/Weapons/Weapon.h"
@@ -157,10 +157,17 @@ void AEnemy::BeginPlay()
 	HideHealthBar();
 
 	//武器を装備させたい場合の処理。（Zonbieと、虫は例外）
+	InitializeEnemy();
+
+	Tags.Add(FName("Enemy"));
+}
+
+void AEnemy::InitializeEnemy()
+{
 	UWorld* World = GetWorld();
 	if (World && WeaponClass) {
-		AWeapon* DefaultWeapon = World -> SpawnActor<AWeapon>(WeaponClass);
-		DefaultWeapon->Equip(GetMesh() , FName("RightHandSocket") , this , this);
+		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+		DefaultWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
 
 		EquippedWeapon = DefaultWeapon;
 	}
@@ -279,7 +286,7 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 		EnemyState != EEnemyState::EES_Dead      &&
 		EnemyState != EEnemyState::EES_Chasing   &&
 		EnemyState  < EEnemyState::EES_Attacking &&
-		SeenPawn->ActorHasTag(FName("Player"));
+		SeenPawn->ActorHasTag(FName("EngageableTarget"));
 
 	if (bShouldChaseTarget)
 	{
@@ -350,18 +357,7 @@ void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
 
 	PlayerHitSound  (ImpactPoint);
 	PlayerSlashSound(ImpactPoint);
-
-	/*パーティクルの大きさと、ランダムで角度を変えて出す演出*/
-	FVector Scale(2.5f, 2.5f, 2.5f);
-	FRotator RandomRotation
-		= FRotator
-		(
-			FMath::FRandRange(0.f, 360.f),
-			FMath::FRandRange(0.f, 360.f),
-			FMath::FRandRange(0.f, 360.f)
-		);
-
-	SpawnHitParticles(ImpactPoint , Scale , RandomRotation);
+	SpawnHitParticles(ImpactPoint);
 }
 
 

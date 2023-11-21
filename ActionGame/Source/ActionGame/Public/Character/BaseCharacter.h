@@ -44,7 +44,7 @@ protected:
 			void DirectionalHitReact(const FVector& ImpactPoint);
 			void PlayerHitSound     (const FVector& ImpactPoint);
 			void PlayerSlashSound   (const FVector& ImpactPoint);
-			void SpawnHitParticles  (const FVector& ImpactPoint, FVector ParticleScale, FRotator RandomRotation);
+			void SpawnHitParticles  (const FVector& ImpactPoint);
 	virtual void HandleDamage(float DamageAmount);
 			void PlayMontageSection(UAnimMontage* Montage, const FName& SectionName);
 

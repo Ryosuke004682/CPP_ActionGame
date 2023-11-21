@@ -123,7 +123,7 @@ void ABaseCharacter::PlayerSlashSound(const FVector& ImpactPoint)
 	}
 }
 
-void ABaseCharacter::SpawnHitParticles(const FVector& ImpactPoint, FVector ParticleScale, FRotator RandomRotation)
+void ABaseCharacter::SpawnHitParticles(const FVector& ImpactPoint)
 {
 	//パーティクルを出す
 	if (HitParticles && GetWorld())
@@ -132,9 +132,7 @@ void ABaseCharacter::SpawnHitParticles(const FVector& ImpactPoint, FVector Parti
 		(
 			GetWorld(),
 			HitParticles,
-			ImpactPoint,
-			RandomRotation,
-			ParticleScale
+			ImpactPoint
 		);
 	}
 }
