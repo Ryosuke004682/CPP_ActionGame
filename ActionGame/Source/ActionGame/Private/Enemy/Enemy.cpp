@@ -7,6 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Component/PlayerComponent.h"
+<<<<<<< HEAD
+#include "Components/CapsuleComponent.h"
+=======
+>>>>>>> master
 #include "HUD/HitpointBarComponent.h"
 #include "Items/Weapons/Weapon.h"
 
@@ -329,6 +333,96 @@ void AEnemy::ClearAttackTimer()
 }
 
 
+<<<<<<< HEAD
+void AEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	EnemyController = Cast<AAIController>(GetController());
+	MoveToTarget(PatrolTarget);
+	HideHealthBar();
+
+	//武器を装備させたい場合の処理。（Zonbieと、虫は例外）
+	InitializeEnemy();
+
+	Tags.Add(FName("Enemy"));
+}
+
+void AEnemy::InitializeEnemy()
+{
+	UWorld* World = GetWorld();
+	if (World && WeaponClass) {
+		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+		DefaultWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+
+		EquippedWeapon = DefaultWeapon;
+	}
+}
+
+void AEnemy::Die()
+{
+	EnemyState = EEnemyState::EES_Dead;
+	PlayDeathMontage();
+	ClearAttackTimer();
+	HideHealthBar();
+	DisableCapsule();
+	SetLifeSpan(DeathLifeSpan);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+}
+
+void AEnemy::Attack()
+{
+	EnemyState = EEnemyState::EES_Engaged;
+
+	Super::Attack();
+	PlayAttackMontage();
+}
+
+
+bool AEnemy::CanAttack()
+{
+
+	bool bCanAttack = 
+		IsInsideAttackRadius() &&
+		!IsAttacking()		   &&
+		!IsEngaged()		   &&
+		!IsDead();
+
+	return bCanAttack;
+}
+
+void AEnemy::HandleDamage(float DamageAmount)
+{
+	Super::HandleDamage(DamageAmount);
+
+	if (PlayerComponent && HealthBarWidget)
+	{
+		HealthBarWidget->SetHealthPercent(PlayerComponent->GetHealthPercent());//体力を減らす
+	}
+}
+
+int32 AEnemy::PlayDeathMontage()
+{
+	const int32 Selection = Super::PlayDeathMontage();
+	TEnumAsByte<EDeathPose> Pose(Selection);
+
+	if (Pose < EDeathPose::EDP_MAX)
+	{
+		DeathPose = Pose;
+	}
+
+	return Selection;
+}
+
+void AEnemy::AttackEnd()
+{
+	EnemyState = EEnemyState::EES_NoState;
+	CheckCombatTarget();
+}
+
+
+=======
+>>>>>>> master
 bool AEnemy::InTargetRange(AActor* Target, double Radius)
 {
 	if (Target == nullptr) return false;
@@ -390,7 +484,7 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 		EnemyState != EEnemyState::EES_Dead      &&
 		EnemyState != EEnemyState::EES_Chasing   &&
 		EnemyState  < EEnemyState::EES_Attacking &&
-		SeenPawn->ActorHasTag(FName("Player"));
+		SeenPawn->ActorHasTag(FName("EngageableTarget"));
 
 	if (bShouldChaseTarget)
 	{
@@ -398,4 +492,90 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 		ClearPatrolTimer();
 		ChaseTarget();
 	}
+<<<<<<< HEAD
+}
+
+
+void AEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (IsDead()) return;
+	
+	if (EnemyState > EEnemyState::EES_Patrolling)
+	{
+		CheckCombatTarget();
+	}
+	else
+	{
+		CheckPatrolTarget();
+	}
+}
+
+
+void AEnemy::CheckPatrolTarget()
+{
+	if (InTargetRange(PatrolTarget, CombatRadius))
+	{
+		PatrolTarget = ChoosePatrolTarget();
+		const float WaitTime = FMath::RandRange(PatrolWaitMin , PatrolWaitMax);
+
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolTimerFinished, WaitTime);
+	}
+}
+
+
+void AEnemy::CheckCombatTarget()
+{
+	if (IsOutsideCombatRadius())
+	{
+		ClearAttackTimer();
+		LoseInTarget();
+
+		if (!IsEngaged()) { StartPatrolling(); }
+
+	}
+	else if (IsOutsideAttackRange() && !IsChasing())
+	{
+		ClearAttackTimer();
+
+		if (!IsEngaged()) { ChaseTarget(); }
+
+	}
+	else if (CanAttack())
+	{
+		StartAttackTimer();
+	}
+}
+
+void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
+{
+	ShowHealthBar();
+
+	if (IsAlive()) { DirectionalHitReact(ImpactPoint); }
+	else		   { Die(); }
+
+	PlayerHitSound  (ImpactPoint);
+	PlayerSlashSound(ImpactPoint);
+	SpawnHitParticles(ImpactPoint);
+}
+
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	HandleDamage(DamageAmount);
+
+	CombatTarget = EventInstigator->GetPawn();
+	ChaseTarget();
+	return DamageAmount;
+}
+
+
+void AEnemy::Destroyed()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Destroy();
+	}
+=======
+>>>>>>> master
 }

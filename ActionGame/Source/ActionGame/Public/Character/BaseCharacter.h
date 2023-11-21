@@ -29,6 +29,9 @@ protected:
 			void DirectionalHitReact(const FVector& ImpactPoint);
 			void PlayerHitSound     (const FVector& ImpactPoint);
 			void PlayerSlashSound   (const FVector& ImpactPoint);
+<<<<<<< HEAD
+			void SpawnHitParticles  (const FVector& ImpactPoint);
+=======
 			void SpawnHitParticles  (const FVector& ImpactPoint, FVector ParticleScale, FRotator RandomRotation);
 			void DisableCapsule();
 	virtual bool CanAttack();
@@ -46,6 +49,7 @@ protected:
 	/*Play montage function*/
 			void PlayHitReactMontage(const FName& SectionName);
 
+>>>>>>> master
 	virtual void HandleDamage(float DamageAmount);
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)

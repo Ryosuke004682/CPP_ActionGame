@@ -38,6 +38,7 @@ public:
 protected:
 	/*<AActor>*/
 	virtual void BeginPlay() override;
+	void InitializeEnemy();
 	/*</AActor>*/
 
 	/*<ABaseCharacter>*/
