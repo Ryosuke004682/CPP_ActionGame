@@ -3,15 +3,16 @@
 #include "Enemy/Enemy.h"
 #include "AIController.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Component/PlayerComponent.h"
+<<<<<<< HEAD
 #include "Components/CapsuleComponent.h"
+=======
+>>>>>>> master
 #include "HUD/HitpointBarComponent.h"
 #include "Items/Weapons/Weapon.h"
-#include "Kismet/KismetSystemLibrary.h"
-
-#include "ActionGame/DebugMacros.h"
 
 
 AEnemy::AEnemy()
@@ -36,6 +37,189 @@ AEnemy::AEnemy()
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
 	PawnSensing->SightRadius = 4000.f;
 	PawnSensing->SetPeripheralVisionAngle(45.f);
+}
+
+
+void AEnemy::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (IsDead()) return;
+
+	if (EnemyState > EEnemyState::EES_Patrolling)
+	{
+		CheckCombatTarget();
+	}
+	else
+	{
+		CheckPatrolTarget();
+	}
+}
+
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	HandleDamage(DamageAmount);
+
+	CombatTarget = EventInstigator->GetPawn();
+	ChaseTarget();
+	return DamageAmount;
+}
+
+
+void AEnemy::Destroyed()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Destroy();
+	}
+}
+
+
+void AEnemy::GetHit_Implementation(const FVector& ImpactPoint)
+{
+	ShowHealthBar();
+
+	if (IsAlive()) { DirectionalHitReact(ImpactPoint); }
+	else { Die(); }
+
+	PlayerHitSound(ImpactPoint);
+	PlayerSlashSound(ImpactPoint);
+
+	/*パーティクルの大きさと、ランダムで角度を変えて出す演出*/
+	FVector Scale(2.5f, 2.5f, 2.5f);
+	FRotator RandomRotation
+		= FRotator
+		(
+			FMath::FRandRange(0.f, 360.f),
+			FMath::FRandRange(0.f, 360.f),
+			FMath::FRandRange(0.f, 360.f)
+		);
+
+	SpawnHitParticles(ImpactPoint, Scale, RandomRotation);
+}
+
+
+void AEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (PawnSensing)
+	{
+		PawnSensing->OnSeePawn.AddDynamic(this , &AEnemy::PawnSeen);
+	}
+
+	InitializeEnemy();
+}
+
+
+void AEnemy::Die()
+{
+	EnemyState = EEnemyState::EES_Dead;
+	PlayDeathMontage();
+	ClearAttackTimer();
+	HideHealthBar();
+	DisableCapsule();
+	SetLifeSpan(DeathLifeSpan);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+}
+
+
+void AEnemy::Attack()
+{
+	EnemyState = EEnemyState::EES_Engaged;
+
+	Super::Attack();
+	PlayAttackMontage();
+}
+
+
+bool AEnemy::CanAttack()
+{
+
+	bool bCanAttack =
+		IsInsideAttackRadius() &&
+		!IsAttacking() &&
+		!IsEngaged() &&
+		!IsDead();
+
+	return bCanAttack;
+}
+
+
+void AEnemy::AttackEnd()
+{
+	EnemyState = EEnemyState::EES_NoState;
+	CheckCombatTarget();
+}
+
+
+void AEnemy::HandleDamage(float DamageAmount)
+{
+	Super::HandleDamage(DamageAmount);
+
+	if (PlayerComponent && HealthBarWidget)
+	{
+		HealthBarWidget->SetHealthPercent(PlayerComponent->GetHealthPercent());//体力を減らす
+	}
+}
+
+
+int32 AEnemy::PlayDeathMontage()
+{
+	const int32 Selection = Super::PlayDeathMontage();
+	TEnumAsByte<EDeathPose> Pose(Selection);
+
+	if (Pose < EDeathPose::EDP_MAX)
+	{
+		DeathPose = Pose;
+	}
+
+	return Selection;
+}
+
+
+void AEnemy::InitializeEnemy()
+{
+	EnemyController = Cast<AAIController>(GetController());
+	MoveToTarget(PatrolTarget);
+	HideHealthBar();
+	SpawnDefaultWeapon();//武器を装備させたい場合の処理。（Zonbieと、虫は例外）
+}
+
+
+void AEnemy::CheckPatrolTarget()
+{
+	if (InTargetRange(PatrolTarget, CombatRadius))
+	{
+		PatrolTarget = ChoosePatrolTarget();
+		const float WaitTime = FMath::RandRange(PatrolWaitMin, PatrolWaitMax);
+
+		GetWorldTimerManager().SetTimer(PatrolTimer, this, &AEnemy::PatrolTimerFinished, WaitTime);
+	}
+}
+
+
+void AEnemy::CheckCombatTarget()
+{
+	if (IsOutsideCombatRadius())
+	{
+		ClearAttackTimer();
+		LoseInTarget();
+
+		if (!IsEngaged()) { StartPatrolling(); }
+
+	}
+	else if (IsOutsideAttackRange() && !IsChasing())
+	{
+		ClearAttackTimer();
+
+		if (!IsEngaged()) { ChaseTarget(); }
+
+	}
+	else if (CanAttack())
+	{
+		StartAttackTimer();
+	}
 }
 
 
@@ -122,6 +306,7 @@ bool AEnemy::IsDead()
 	return EnemyState == EEnemyState::EES_Dead;;
 }
 
+
 bool AEnemy::IsEngaged()
 {
 	return EnemyState == EEnemyState::EES_Engaged;
@@ -148,6 +333,7 @@ void AEnemy::ClearAttackTimer()
 }
 
 
+<<<<<<< HEAD
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -235,13 +421,13 @@ void AEnemy::AttackEnd()
 }
 
 
+=======
+>>>>>>> master
 bool AEnemy::InTargetRange(AActor* Target, double Radius)
 {
 	if (Target == nullptr) return false;
 
 	const double DistanceToTarget = ( Target -> GetActorLocation() - GetActorLocation() ).Size();
-	DRAW_SPHERE_SingleFrame( GetActorLocation() );
-	DRAW_SPHERE_SingleFrame( Target -> GetActorLocation() );
 	return DistanceToTarget <= Radius;
 }
 
@@ -280,6 +466,18 @@ AActor* AEnemy::ChoosePatrolTarget()
 }
 
 
+void AEnemy::SpawnDefaultWeapon()
+{
+	UWorld* World = GetWorld();
+	if (World && WeaponClass) {
+		AWeapon* DefaultWeapon = World->SpawnActor<AWeapon>(WeaponClass);
+		DefaultWeapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+
+		EquippedWeapon = DefaultWeapon;
+	}
+}
+
+
 void AEnemy::PawnSeen(APawn* SeenPawn)
 {
 	const bool bShouldChaseTarget =
@@ -294,6 +492,7 @@ void AEnemy::PawnSeen(APawn* SeenPawn)
 		ClearPatrolTimer();
 		ChaseTarget();
 	}
+<<<<<<< HEAD
 }
 
 
@@ -377,4 +576,6 @@ void AEnemy::Destroyed()
 	{
 		EquippedWeapon->Destroy();
 	}
+=======
+>>>>>>> master
 }

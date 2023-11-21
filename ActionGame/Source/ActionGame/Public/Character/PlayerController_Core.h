@@ -18,7 +18,6 @@ class ACTIONGAME_API APlayerController_Core : public ABaseCharacter
 public:
 	APlayerController_Core();
 
-	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetHit_Implementation(const FVector& ImpactPoint) override;
 
@@ -30,27 +29,31 @@ protected:
 	virtual void BeginPlay() override;
 
 	/*Callbacks for input*/
-	void MoveForward(float Value);
-	void MoveRight	(float Value);
-	void Turn		(float Value);
-	void LookUp		(float Value);
-	void EKeyPressed();
-
+			void MoveForward(float Value);
+			void MoveRight	(float Value);
+			void Turn		(float Value);
+			void LookUp		(float Value);
+			void EKeyPressed();
 	virtual void Attack() override;
+
+
+	/*Combat*/
+			void EquipWeapon(AWeapon* Weapon);
 	virtual void AttackEnd() override;
 	virtual bool CanAttack() override;
+			bool CanDisarm();
+			bool CanArm();
+			void Disarm();
+			void Arm();
+			void PlayEquipMontage(const FName& SectionName);
 
 
-	void PlayEquipMontage(const FName& SectionName);
-	bool CanDisarm();
-	bool CanArm();
-
-
-	UFUNCTION(BlueprintCallable)
-		void Disarm();
 
 	UFUNCTION(BlueprintCallable)
-		void Arm();
+		void AttachWeaponToBack();
+
+	UFUNCTION(BlueprintCallable)
+		void AttachWeaponToHand();
 
 	UFUNCTION(BlueprintCallable)
 		void FinishEquipping();
@@ -58,13 +61,7 @@ protected:
 
 private:
 
-	//ïêäÌÇ™ëïîıÇ≥ÇÍÇƒÇ»Ç¢èÛë‘ÇÃê›íË
-	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
-
-	UPROPERTY(BlueprintReadWrite , meta = (AllowPrivateAccess = "true"))
-	EActionState ActionState       = EActionState::EAS_Unoccupied;
-
-
+	/*CharacterComponent*/
 	UPROPERTY(VisibleAnywhere)
 		USpringArmComponent* Camera;
 
@@ -76,4 +73,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = Montage)
 		UAnimMontage* EquipMontage;
+
+	//ïêäÌÇ™ëïîıÇ≥ÇÍÇƒÇ»Ç¢èÛë‘ÇÃê›íË
+	ECharacterState CharacterState = ECharacterState::ECS_Unequipped;
+
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		EActionState ActionState = EActionState::EAS_Unoccupied;
 };

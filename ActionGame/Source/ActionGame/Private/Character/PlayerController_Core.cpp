@@ -8,11 +8,10 @@
 #include "Items/Item.h"
 #include "Items/Weapons/Weapon.h"
 #include "Animation/AnimMontage.h"
-#include "Components/BoxComponent.h"
 
 APlayerController_Core::APlayerController_Core()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationPitch   = false;
 	bUseControllerRotationRoll	  = false;
@@ -41,6 +40,7 @@ APlayerController_Core::APlayerController_Core()
 
 }
 
+<<<<<<< HEAD
 void APlayerController_Core::BeginPlay()
 {
 	Super::BeginPlay();
@@ -54,6 +54,8 @@ void APlayerController_Core::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+=======
+>>>>>>> master
 
 /// <summary>
 /// 入力関連をまとめてるところ
@@ -80,6 +82,35 @@ void APlayerController_Core::GetHit_Implementation(const FVector& ImpactPoint)
 	PlayerHitSound(ImpactPoint);
 	SpawnHitParticles(ImpactPoint);
 }
+
+
+void APlayerController_Core::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	Tags.Add(FName("Player"));
+
+}
+
+
+void APlayerController_Core::EquipWeapon(AWeapon* Weapon)
+{
+	Weapon->Equip(GetMesh(), FName("RightHandSocket"), this, this);
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	OverlappingItem = nullptr;
+	EquippedWeapon = Weapon;
+
+}
+
+/// <summary>
+/// 攻撃終わりを通知する処理
+/// </summary>
+void APlayerController_Core::AttackEnd()
+{
+	ActionState = EActionState::EAS_Unoccupied;
+}
+
+
 
 
 /// <summary>
@@ -148,35 +179,28 @@ void APlayerController_Core::LookUp(float Value)
 }
 
 
-
 void APlayerController_Core::EKeyPressed()
 {
 	AWeapon* OverlappingWeapon = Cast<AWeapon>(OverlappingItem);
 	if (OverlappingWeapon)
 	{
-		OverlappingWeapon->Equip(GetMesh(), FName("RightHandSocket") , this , this);
-		CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
-		OverlappingItem = nullptr;
-		EquippedWeapon  = OverlappingWeapon;
+		EquipWeapon(OverlappingWeapon);
 	}
 	else
 	{
 		//納刀/抜刀の処理
 		if ( CanDisarm() )
 		{
-			PlayEquipMontage(FName("UnEquip"));
-			CharacterState = ECharacterState::ECS_Unequipped;
-			ActionState    = EActionState::EAS_EquippingWeapon;
+			Disarm();
 		}
 		else if ( CanArm() )
 		{
-			PlayEquipMontage(FName("Equip"));
-			CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
-			ActionState    = EActionState::EAS_EquippingWeapon;
+			Arm();
 		}
 	}
 
 }
+
 
 /// <summary>
 /// 攻撃の処理
@@ -192,6 +216,7 @@ void APlayerController_Core::Attack()
 		ActionState = EActionState::EAS_Attacking;
 	}
 }
+
 
 /// <summary>
 /// 攻撃可能だったら攻撃のステートの判定を返す処理
@@ -215,7 +240,6 @@ bool APlayerController_Core::CanDisarm()
 }
 
 
-
 /// <summary>
 /// 手に装備させる
 /// </summary>
@@ -226,7 +250,23 @@ bool APlayerController_Core::CanArm()
 					   == ECharacterState::ECS_Unequipped && EquippedWeapon;
 }
 
+
 void APlayerController_Core::Disarm()
+{
+	PlayEquipMontage(FName("UnEquip"));
+	CharacterState = ECharacterState::ECS_Unequipped;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+void APlayerController_Core::Arm()
+{
+	PlayEquipMontage(FName("Equip"));
+	CharacterState = ECharacterState::ECS_EquippedOneHandedWeapon;
+	ActionState = EActionState::EAS_EquippingWeapon;
+}
+
+
+void APlayerController_Core::AttachWeaponToBack()
 {
 	if (EquippedWeapon)
 	{
@@ -234,17 +274,13 @@ void APlayerController_Core::Disarm()
 	}
 }
 
-void APlayerController_Core::Arm()
+
+void APlayerController_Core::AttachWeaponToHand()
 {
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->AttachMeshToSocket(GetMesh(), FName("RightHandSocket"));
 	}
-}
-
-void APlayerController_Core::FinishEquipping()
-{
-	ActionState = EActionState::EAS_Unoccupied;
 }
 
 
@@ -260,10 +296,7 @@ void APlayerController_Core::PlayEquipMontage(const FName& SectionName)
 }
 
 
-/// <summary>
-/// 攻撃終わりを通知する処理
-/// </summary>
-void APlayerController_Core::AttackEnd()
+void APlayerController_Core::FinishEquipping()
 {
 	ActionState = EActionState::EAS_Unoccupied;
 }
